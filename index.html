@@ -192,7 +192,8 @@
 
             const analyzeAllProcesses = () => {
                 const currentMins = currentTime.getHours() * 60 + currentTime.getMinutes();
-                return config.processes.map(process => {
+                // Primer pase: calcular datos base
+                const base = config.processes.map(process => {
                     const planned = getPlannedTime(process);
                     const itinerary = getItineraryTime(process);
                     const real = realTimes[process.id];
@@ -205,18 +206,30 @@
                     } else {
                         status = (!isConfigured || plannedMins === null) ? 'setup' : 'planned';
                     }
-                    const inProgress = !real && plannedMins !== null && Math.abs(plannedMins - currentMins) <= 2;
-                    
-                    return {
-                        ...process,
-                        planned,
-                        itinerary,
-                        real,
-                        diff,
-                        status,
-                        inProgress
-                    };
+                    return { process, planned, itinerary, real, diff, plannedMins, status };
                 });
+
+                // Seleccionar un único proceso "en progreso": el más cercano a la hora actual
+                const candidates = base.filter(b => !b.real && b.plannedMins !== null);
+                let selectedId = null;
+                let bestDiff = Infinity;
+                for (const b of candidates) {
+                    const d = Math.abs(b.plannedMins - currentMins);
+                    if (d < bestDiff) { bestDiff = d; selectedId = b.process.id; }
+                }
+                // Ventana de activación: ±5 minutos
+                const enableProgress = bestDiff <= 5;
+
+                // Segundo pase: devolver estructura final con inProgress marcado solo para el seleccionado
+                return base.map(b => ({
+                    ...b.process,
+                    planned: b.planned,
+                    itinerary: b.itinerary,
+                    real: b.real,
+                    diff: b.diff,
+                    status: b.status,
+                    inProgress: enableProgress && b.process.id === selectedId
+                }));
             };
 
             const calculateActualTAT = () => {
@@ -754,7 +767,18 @@
             );
         };
 
-        ReactDOM.render(<TATCalculator />, document.getElementById('root'));
+        // Footer persistente de la calculadora (fuera del modal)
+        // Nota: se renderiza al final del documento para no duplicar estilos.
+
+        ReactDOM.render(
+            <>
+                <TATCalculator />
+                <div className="mt-6 py-4 text-center text-xs text-slate-500">
+                    hecho con ♥️ por <a href="https://wsaico.com" target="_blank" rel="noopener noreferrer" className="underline">wsaico</a>
+                </div>
+            </>,
+            document.getElementById('root')
+        );
     </script>
 </body>
 </html>
