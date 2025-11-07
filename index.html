@@ -45,9 +45,12 @@
         .input-primary{ background-color:#FFFFFF; border:1px solid var(--soft-primary-border); color:var(--primary); }
         .input-secondary{ background-color: var(--soft-secondary-bg); border:1px solid var(--soft-secondary-border); color:#335e11; }
         .card-ok{ background-color: var(--secondary); }
-        /* Tarjeta del reloj con efecto LED verde, sin cambiar tamaño */
-        .card-clock{ background: linear-gradient(135deg,#0b1221,#0f1b35); position:relative; box-shadow: inset 0 0 0 1px rgba(141,187,54,.35), 0 0 10px rgba(141,187,54,.25); }
-        .card-clock::before{ content:""; position:absolute; inset:0; background-image: radial-gradient(circle at 8px 8px, rgba(141,187,54,.10) 0 2px, transparent 2.8px); background-size: 18px 18px; opacity:.35; pointer-events:none; border-radius: inherit; }
+        /* Tarjeta del reloj estilo neumorphic moderno, sin cambiar tamaño */
+        .card-clock{ background: var(--soft-primary-bg); position:relative; border-radius:12px; box-shadow: 8px 8px 18px #cbd5e1, -8px -8px 18px #ffffff; }
+        .card-clock::before{ content:""; position:absolute; inset:0; border-radius:inherit; background: linear-gradient(to bottom right, rgba(255,255,255,.55), rgba(255,255,255,0)); pointer-events:none; }
+        .card-clock .text-white{ color:#0f172a !important; }
+        .card-clock .text-white\/70{ color:rgba(15,23,42,.7) !important; }
+        .card-clock .text-white\/80{ color:rgba(15,23,42,.8) !important; }
         .card-late{ background-color: var(--red); }
         .card-neutral{ background-color: var(--primary); }
         .badge-ok{ background-color: var(--soft-secondary-bg); color:#3C5F1C; border:1px solid var(--soft-secondary-border); }
@@ -552,15 +555,15 @@
                                 <div className="absolute top-1 right-1">
                                     <span className={`text-[10px] font-bold badge-cp ${cpApproaching ? 'cp-attention' : ''}`}>CP {cpPlanned || '--:--'}</span>
                                 </div>
-                                <div className="text-white/70 text-xs font-bold flex items-center justify-center gap-1 text-center">
+                                <div className="text-slate-600 text-xs font-bold flex items-center justify-center gap-1 text-center">
                                     <Icon type="clock" className="w-3.5 h-3.5" /> Reloj
                                 </div>
-                                <div className="text-white text-xl font-black digital-clock text-center">
+                                <div className="text-slate-800 text-xl font-black digital-clock text-center">
                                     <span className="digits">{String(currentTime.getHours()).padStart(2, '0')}</span>
                                     <span className="colon">:</span>
                                     <span className="digits">{String(currentTime.getMinutes()).padStart(2, '0')}</span>
                                 </div>
-                                <div className="text-white/80 text-xs text-center">hora actual</div>
+                                <div className="text-slate-500 text-xs text-center">hora actual</div>
                             </div>
                             <div className={`rounded-lg p-2.5 ${delays.length > 0 ? 'bg-orange-600' : 'bg-slate-600'}`}>
                                 <div className="text-white/70 text-xs font-bold">Retrasos</div>
