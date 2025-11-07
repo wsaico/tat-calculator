@@ -8,6 +8,7 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -372,6 +373,29 @@
                 setTimeout(() => URL.revokeObjectURL(url), 1500);
             };
 
+            const downloadSummaryPNG = async () => {
+                const wasOpen = showSummary;
+                if (!wasOpen) setShowSummary(true);
+                const wait = (ms) => new Promise(r => setTimeout(r, ms));
+                await wait(150);
+                const el = summaryRef.current;
+                if (!el || typeof html2canvas === 'undefined') return;
+                const prev = { maxHeight: el.style.maxHeight, overflow: el.style.overflow, boxShadow: el.style.boxShadow };
+                el.style.maxHeight = 'none';
+                el.style.overflow = 'visible';
+                el.style.boxShadow = 'none';
+                const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+                el.style.maxHeight = prev.maxHeight;
+                el.style.overflow = prev.overflow;
+                el.style.boxShadow = prev.boxShadow;
+                const data = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = data;
+                link.download = `TAT_Resumen_${new Date().toISOString().slice(0,16).replace('T','_')}.png`;
+                link.click();
+                if (!wasOpen) setShowSummary(false);
+            };
+
             return (
                 <div className="min-h-screen bg-slate-50">
                     {/* Header */}
@@ -389,6 +413,7 @@
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button onClick={generateHtmlSummary} className="px-2 h-9 btn-primary rounded-lg text-xs font-bold">Ver Resumen</button>
+                                    <button onClick={downloadSummaryPNG} className="px-2 h-9 bg-slate-100 text-slate-800 border border-slate-300 rounded-lg text-xs font-bold">Descargar PNG</button>
                                     <button onClick={() => setShowItinerary(v => !v)} className={`px-2 h-9 rounded-lg text-xs font-bold border ${showItinerary ? 'btn-secondary' : 'bg-slate-100 text-slate-700 border-slate-300'}`}>
                                         {showItinerary ? 'Itinerario comercial: ON' : 'Itinerario comercial: OFF'}
                                     </button>
