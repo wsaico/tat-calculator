@@ -237,7 +237,7 @@
                     s === 'planned' ? 'Planificado' :
                     'Planificar'
                 );
-                const nowStr = new Date().toLocaleString('es-PE');
+        const nowStr = new Date().toLocaleString('es-PE', { hour12: false });
                 const delaysSorted = [...delays].sort((a, b) => b.diff - a.diff);
                 const complianceText = actualTAT !== null ? (tatDiff > 0 ? `Fuera de tiempo +${tatDiff}'` : 'OK') : '--';
                 const complianceClass = actualTAT !== null && tatDiff > 0 ? 'color:#dc2626' : 'color:#16a34a';
@@ -548,7 +548,7 @@
                                 <div className="p-5">
                                     <div className="text-center mb-4 pb-4 border-b-2 border-slate-200">
                                         <h2 className="text-xl font-black text-slate-800">RESUMEN TAT</h2>
-                                        <p className="text-xs text-slate-500 mt-1 font-mono">{new Date().toLocaleString('es-PE')}</p>
+                                        <p className="text-xs text-slate-500 mt-1 font-mono">{new Date().toLocaleString('es-PE', { hour12: false })}</p>
                                         <div className="flex justify-center gap-4 mt-3">
                                             <div className="text-center">
                                                 <div className="text-xs text-slate-600 font-bold">Tipo</div>
