@@ -56,6 +56,12 @@
             100% { box-shadow: 0 0 0 0 rgba(141,187,54,0.0); }
         }
         .pulse { animation: pulseSecondary 1.8s ease-out infinite; }
+        /* Indicador llamativo de progreso */
+        @keyframes spin360 { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+        .spinner { width: 14px; height: 14px; border-radius: 9999px; border: 2px solid rgba(141,187,54,.35); border-top-color: var(--secondary); display:inline-block; animation: spin360 1s linear infinite; }
+        .progress-track { position: relative; height: 6px; border-radius: 8px; background: rgba(141,187,54,.15); border: 1px solid rgba(141,187,54,.35); overflow: hidden; }
+        @keyframes slideStripes { from { background-position: 0 0 } to { background-position: 30px 0 } }
+        .progress-indicator { position:absolute; inset:0; background-image: repeating-linear-gradient(45deg, rgba(141,187,54,.6) 0 10px, rgba(141,187,54,.2) 10px 20px); animation: slideStripes .6s linear infinite; }
     </style>
 </head>
 <body>
@@ -555,8 +561,16 @@
                                                         <h4 className="text-sm font-bold text-slate-800">{proc.name}</h4>
                                                         {proc.highlight && <span className="text-xs px-1.5 py-0.5 bg-red-600 text-white rounded font-bold">CRÍTICO</span>}
                                                     </div>
-                                                    <span className={`text-xs font-bold rounded-full px-2 py-0.5 ${badgeClass}`}>{badgeText}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`text-xs font-bold rounded-full px-2 py-0.5 ${badgeClass}`}>{badgeText}</span>
+                                                        {proc.inProgress && <span className="spinner" aria-label="progreso" />}
+                                                    </div>
                                                 </div>
+                                                {proc.inProgress && (
+                                                    <div className="progress-track mt-1">
+                                                        <div className="progress-indicator"></div>
+                                                    </div>
+                                                )}
                                                 <div className="flex items-center justify-between mt-1">
                                                 <div className="flex items-center gap-2 flex-wrap">
                                                     <span className="text-xs text-slate-500 font-semibold">Plan: <span className="font-mono font-bold text-slate-700">{proc.planned || '--:--'}</span></span>
