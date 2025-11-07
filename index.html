@@ -45,6 +45,9 @@
         .input-primary{ background-color:#FFFFFF; border:1px solid var(--soft-primary-border); color:var(--primary); }
         .input-secondary{ background-color: var(--soft-secondary-bg); border:1px solid var(--soft-secondary-border); color:#335e11; }
         .card-ok{ background-color: var(--secondary); }
+        /* Tarjeta del reloj con efecto LED verde, sin cambiar tamaño */
+        .card-clock{ background: linear-gradient(135deg,#0b1221,#0f1b35); position:relative; box-shadow: inset 0 0 0 1px rgba(141,187,54,.35), 0 0 10px rgba(141,187,54,.25); }
+        .card-clock::before{ content:""; position:absolute; inset:0; background-image: radial-gradient(circle at 8px 8px, rgba(141,187,54,.10) 0 2px, transparent 2.8px); background-size: 18px 18px; opacity:.35; pointer-events:none; border-radius: inherit; }
         .card-late{ background-color: var(--red); }
         .card-neutral{ background-color: var(--primary); }
         .badge-ok{ background-color: var(--soft-secondary-bg); color:#3C5F1C; border:1px solid var(--soft-secondary-border); }
@@ -535,16 +538,19 @@
                                 <div className="text-white text-xl font-black">{actualTAT !== null ? `${actualTAT}'` : `--'`}</div>
                                 <div className="text-white/80 text-xs">/{tatTarget}'</div>
                             </div>
-                            <div className="rounded-lg p-2.5 card-ok">
-                                <div className="text-white/70 text-xs font-bold flex items-center gap-1">
+                            <div className="rounded-lg p-2.5 card-clock">
+                                <div className="absolute top-1 right-1">
+                                    <span className="text-[10px] font-bold badge-plan">CP {(allProcesses.find(p => p.id === 'doorsClosed')?.planned) || '--:--'}</span>
+                                </div>
+                                <div className="text-white/70 text-xs font-bold flex items-center justify-center gap-1 text-center">
                                     <Icon type="clock" className="w-3.5 h-3.5" /> Reloj
                                 </div>
-                                <div className="text-white text-xl font-black digital-clock">
+                                <div className="text-white text-xl font-black digital-clock text-center">
                                     <span className="digits">{String(currentTime.getHours()).padStart(2, '0')}</span>
                                     <span className="colon">:</span>
                                     <span className="digits">{String(currentTime.getMinutes()).padStart(2, '0')}</span>
                                 </div>
-                                <div className="text-white/80 text-xs">hora actual</div>
+                                <div className="text-white/80 text-xs text-center">hora actual</div>
                             </div>
                             <div className={`rounded-lg p-2.5 ${delays.length > 0 ? 'bg-orange-600' : 'bg-slate-600'}`}>
                                 <div className="text-white/70 text-xs font-bold">Retrasos</div>
