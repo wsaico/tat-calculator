@@ -54,7 +54,10 @@
         .diff-badge{ padding:2px 6px; border-radius:6px; font-weight:700; }
         .diff-ok{ background-color: var(--soft-secondary-bg); color:#3C5F1C; border:1px solid var(--soft-secondary-border); }
         .diff-late{ background-color: var(--soft-red-bg); color:#8B1C1C; border:1px solid var(--soft-red-border); }
-        .minute-pill{ background-color: var(--soft-orange-bg); color:#b45309; border:1px solid var(--soft-orange-border); border-radius:6px; padding:2px 6px; font-weight:800; font-size:11px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+        .minute-pill{ background-color: var(--soft-orange-bg); color:#b45309; border:1px solid var(--soft-orange-border); border-radius:6px; padding:2px 6px; font-weight:800; font-size:12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+        .digital-clock{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; letter-spacing:1px; }
+        .digital-clock .colon{ animation: blinkColon 1s steps(2, start) infinite; }
+        @keyframes blinkColon{ 50%{ opacity: .35 } }
         /* Animación de pulso para items en progreso */
         @keyframes pulseSecondary {
             0% { box-shadow: 0 0 0 0 rgba(141,187,54,0.35); }
@@ -533,9 +536,15 @@
                                 <div className="text-white/80 text-xs">/{tatTarget}'</div>
                             </div>
                             <div className="rounded-lg p-2.5 card-ok">
-                                <div className="text-white/70 text-xs font-bold">Progreso</div>
-                                <div className="text-white text-xl font-black">{completed}</div>
-                                <div className="text-white/80 text-xs">/{config.processes.length}</div>
+                                <div className="text-white/70 text-xs font-bold flex items-center gap-1">
+                                    <Icon type="clock" className="w-3.5 h-3.5" /> Reloj
+                                </div>
+                                <div className="text-white text-xl font-black digital-clock">
+                                    <span className="digits">{String(currentTime.getHours()).padStart(2, '0')}</span>
+                                    <span className="colon">:</span>
+                                    <span className="digits">{String(currentTime.getMinutes()).padStart(2, '0')}</span>
+                                </div>
+                                <div className="text-white/80 text-xs">hora actual</div>
                             </div>
                             <div className={`rounded-lg p-2.5 ${delays.length > 0 ? 'bg-orange-600' : 'bg-slate-600'}`}>
                                 <div className="text-white/70 text-xs font-bold">Retrasos</div>
