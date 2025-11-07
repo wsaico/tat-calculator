@@ -351,12 +351,12 @@
                             </div>
                             
                             <div className="grid grid-cols-2 gap-2">
-                                <button onClick={() => setAircraftType('remolque')} className={`py-1.5 rounded-lg text-xs font-bold ${aircraftType === 'remolque' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
-                                    TAT 35
-                                </button>
-                                <button onClick={() => setAircraftType('autopropulsado')} className={`py-1.5 rounded-lg text-xs font-bold ${aircraftType === 'autopropulsado' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
-                                    TAT 40
-                                </button>
+                                    <button onClick={() => setAircraftType('remolque')} className={`py-1.5 rounded-lg text-xs font-bold ${aircraftType === 'remolque' ? 'header-brand-bg text-white' : 'bg-slate-200 text-slate-700'}`}>
+                                        TAT 35
+                                    </button>
+                                    <button onClick={() => setAircraftType('autopropulsado')} className={`py-1.5 rounded-lg text-xs font-bold ${aircraftType === 'autopropulsado' ? 'header-brand-bg text-white' : 'bg-slate-200 text-slate-700'}`}>
+                                        TAT 40
+                                    </button>
                             </div>
 
                             {/* Switch de itinerario comercial movido al header junto al botón de resumen */}
@@ -410,7 +410,7 @@
                                 <div className="text-white text-xl font-black">{actualTAT !== null ? `${actualTAT}'` : `--'`}</div>
                                 <div className="text-white/80 text-xs">/{tatTarget}'</div>
                             </div>
-                            <div className="rounded-lg p-2.5 bg-blue-600">
+                            <div className="rounded-lg p-2.5 card-neutral">
                                 <div className="text-white/70 text-xs font-bold">Progreso</div>
                                 <div className="text-white text-xl font-black">{completed}</div>
                                 <div className="text-white/80 text-xs">/{config.processes.length}</div>
@@ -472,7 +472,7 @@
                                                         <div className="flex items-center gap-2 flex-wrap justify-end">
                                                             {!proc.real ? (
                                                                 <button onClick={() => captureTime(proc.id)} 
-                                                                    className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-bold active:bg-blue-700 flex items-center justify-center gap-1.5">
+                                                                    className="px-3 py-1.5 btn-primary rounded text-xs font-bold flex items-center justify-center gap-1.5">
                                                                     <Icon type="zap" className="w-3.5 h-3.5" />
                                                                     Capturar
                                                                 </button>
@@ -492,7 +492,7 @@
                                                                     <input type="time" value={realTimes[proc.id] || ''} 
                                                                         onChange={(e) => setRealTimes(prev => ({ ...prev, [proc.id]: e.target.value }))}
                                                                         className="w-24 px-2 py-1 border border-slate-300 rounded font-mono text-xs font-bold" />
-                                                                    <button onClick={() => setEditingId(null)} className="px-2.5 py-1 bg-blue-600 text-white rounded text-xs font-bold">OK</button>
+                                                                    <button onClick={() => setEditingId(null)} className="px-2.5 py-1 btn-primary rounded text-xs font-bold">OK</button>
                                                                     <button onClick={() => {
                                                                         setRealTimes(prev => { const n = {...prev}; delete n[proc.id]; return n; });
                                                                         setEditingId(null);
