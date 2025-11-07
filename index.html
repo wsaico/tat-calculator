@@ -91,6 +91,16 @@
                 return `${String(currentTime.getHours()).padStart(2, '0')}:${String(currentTime.getMinutes()).padStart(2, '0')}`;
             };
 
+            // Utilidades para entrada de tiempo en 24h (HH:MM)
+            const isValidHHMM = (s) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(s);
+            const formatTimeInput = (value) => {
+                const digits = String(value).replace(/[^0-9]/g, '');
+                if (digits.length <= 2) return digits;
+                const hh = digits.slice(0, 2);
+                const mm = digits.slice(2, 4);
+                return mm ? `${hh}:${mm}` : hh;
+            };
+
             const processConfig = {
                 remolque: {
                     tatTotal: 35,
@@ -137,7 +147,7 @@
             const config = processConfig[aircraftType];
 
             const timeToMinutes = (timeStr) => {
-                if (!timeStr) return 0;
+                if (!timeStr || !isValidHHMM(timeStr)) return 0;
                 const [h, m] = timeStr.split(':').map(Number);
                 return h * 60 + m;
             };
@@ -149,9 +159,9 @@
             };
 
             const getPlannedTime = (process) => {
-                if (process.id === 'motorCut') return motorCutTime || null;
-                if (process.id === 'etd') return etdTime || null;
-                if (!motorCutTime) return null;
+                if (process.id === 'motorCut') return isValidHHMM(motorCutTime) ? motorCutTime : null;
+                if (process.id === 'etd') return isValidHHMM(etdTime) ? etdTime : null;
+                if (!motorCutTime || !isValidHHMM(motorCutTime)) return null;
                 const motorMins = timeToMinutes(motorCutTime);
                 const offsetFromMotor = config.tatTotal + process.offset;
                 return minutesToTime(motorMins + offsetFromMotor);
@@ -159,9 +169,9 @@
 
             // Itinerario Comercial: anclado al "Corte Motor Itinerario" editable
             const getItineraryTime = (process) => {
-                if (process.id === 'motorCut') return itineraryMotorCutTime || null;
-                if (process.id === 'etd') return etdTime || null;
-                if (!itineraryMotorCutTime) return null;
+                if (process.id === 'motorCut') return isValidHHMM(itineraryMotorCutTime) ? itineraryMotorCutTime : null;
+                if (process.id === 'etd') return isValidHHMM(etdTime) ? etdTime : null;
+                if (!itineraryMotorCutTime || !isValidHHMM(itineraryMotorCutTime)) return null;
                 const itinMotorMins = timeToMinutes(itineraryMotorCutTime);
                 const offsetFromMotor = config.tatTotal + process.offset;
                 return minutesToTime(itinMotorMins + offsetFromMotor);
@@ -199,12 +209,12 @@
             };
 
             const calculateActualTAT = () => {
-                if (!motorCutTime) return null;
+                if (!motorCutTime || !isValidHHMM(motorCutTime)) return null;
                 const endId = aircraftType === 'autopropulsado' ? 'etd' : 'pushBack';
                 const endProcess = config.processes.find(p => p.id === endId);
                 const plannedEnd = endProcess ? getPlannedTime(endProcess) : null;
                 const realEnd = realTimes[endId] || null;
-                const endTime = realEnd || plannedEnd;
+                const endTime = (realEnd && isValidHHMM(realEnd)) ? realEnd : plannedEnd;
                 if (!endTime) return null;
                 return timeToMinutes(endTime) - timeToMinutes(motorCutTime);
             };
@@ -392,19 +402,25 @@
                             <div className={`grid ${showItinerary ? 'grid-cols-3' : 'grid-cols-2'} gap-3`}>
                                 <div>
                                     <label className="text-xs font-bold text-slate-600 mb-1 block">Corte Motor</label>
-                                    <input type="time" value={motorCutTime} onChange={(e) => setMotorCutTime(e.target.value)} 
+                                    <input type="text" inputMode="numeric" placeholder="HH:MM" value={motorCutTime}
+                                        onChange={(e) => setMotorCutTime(formatTimeInput(e.target.value))}
+                                        pattern="^([01]\\d|2[0-3]):([0-5]\\d)$"
                                         className="w-full px-2.5 py-1.5 input-primary rounded font-mono text-sm font-bold" />
                                 </div>
                                 {showItinerary && (
                                     <div>
                                         <label className="text-xs font-bold text-slate-600 mb-1 block">Corte Motor Itinerario (Comercial)</label>
-                                        <input type="time" value={itineraryMotorCutTime} onChange={(e) => setItineraryMotorCutTime(e.target.value)} 
+                                        <input type="text" inputMode="numeric" placeholder="HH:MM" value={itineraryMotorCutTime}
+                                            onChange={(e) => setItineraryMotorCutTime(formatTimeInput(e.target.value))}
+                                            pattern="^([01]\\d|2[0-3]):([0-5]\\d)$"
                                             className="w-full px-2.5 py-1.5 input-primary rounded font-mono text-sm font-bold" />
                                     </div>
                                 )}
                                 <div>
                                     <label className="text-xs font-bold text-slate-600 mb-1 block">ETD Plan</label>
-                                    <input type="time" value={etdTime} onChange={(e) => setETDTime(e.target.value)} 
+                                    <input type="text" inputMode="numeric" placeholder="HH:MM" value={etdTime}
+                                        onChange={(e) => setETDTime(formatTimeInput(e.target.value))}
+                                        pattern="^([01]\\d|2[0-3]):([0-5]\\d)$"
                                         className="w-full px-2.5 py-1.5 input-secondary rounded font-mono text-sm font-bold" />
                                 </div>
                             </div>
@@ -496,8 +512,9 @@
                                                             )}
                                                             {editingId === proc.id && (
                                                                 <>
-                                                                    <input type="time" value={realTimes[proc.id] || ''} 
-                                                                        onChange={(e) => setRealTimes(prev => ({ ...prev, [proc.id]: e.target.value }))}
+                                                                    <input type="text" inputMode="numeric" placeholder="HH:MM" value={realTimes[proc.id] || ''}
+                                                                        onChange={(e) => setRealTimes(prev => ({ ...prev, [proc.id]: formatTimeInput(e.target.value) }))}
+                                                                        pattern="^([01]\\d|2[0-3]):([0-5]\\d)$"
                                                                         className="w-24 px-2 py-1 border border-slate-300 rounded font-mono text-xs font-bold" />
                                                                     <button onClick={() => setEditingId(null)} className="px-2.5 py-1 btn-primary rounded text-xs font-bold">OK</button>
                                                                     <button onClick={() => {
