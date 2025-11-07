@@ -215,16 +215,25 @@
                     return { process, planned, itinerary, real, diff, plannedMins, status };
                 });
 
-                // Seleccionar un único proceso "en progreso": el más cercano a la hora actual
+                // Seleccionar un único proceso "en progreso" según el tiempo actual
+                // Regla: si hay procesos pendientes con plan <= ahora, elegir el último de esos (activo).
+                // Si no hay, elegir el próximo si está a <= 5 minutos.
                 const candidates = base.filter(b => !b.real && b.plannedMins !== null);
                 let selectedId = null;
-                let bestDiff = Infinity;
-                for (const b of candidates) {
-                    const d = Math.abs(b.plannedMins - currentMins);
-                    if (d < bestDiff) { bestDiff = d; selectedId = b.process.id; }
+                const pastOrNow = candidates
+                    .filter(b => b.plannedMins <= currentMins)
+                    .sort((a,b) => a.plannedMins - b.plannedMins);
+                if (pastOrNow.length > 0) {
+                    selectedId = pastOrNow[pastOrNow.length - 1].process.id;
+                } else {
+                    const ahead = candidates
+                        .filter(b => b.plannedMins > currentMins)
+                        .sort((a,b) => a.plannedMins - b.plannedMins);
+                    if (ahead.length && (ahead[0].plannedMins - currentMins) <= 5) {
+                        selectedId = ahead[0].process.id;
+                    }
                 }
-                // Ventana de activación: ±5 minutos
-                const enableProgress = bestDiff <= 5;
+                const enableProgress = Boolean(selectedId);
 
                 // Segundo pase: devolver estructura final con inProgress marcado solo para el seleccionado
                 return base.map(b => ({
