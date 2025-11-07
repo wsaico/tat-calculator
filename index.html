@@ -47,7 +47,7 @@
         .card-ok{ background-color: var(--secondary); }
         /* Tarjeta del reloj estilo neumorphic moderno, sin cambiar tamaño */
         .card-clock{ background: var(--soft-primary-bg); position:relative; border-radius:12px; box-shadow: 8px 8px 18px #cbd5e1, -8px -8px 18px #ffffff; }
-        .card-clock::before{ content:""; position:absolute; inset:0; border-radius:inherit; background: linear-gradient(to bottom right, rgba(255,255,255,.55), rgba(255,255,255,0)); pointer-events:none; }
+        .card-clock::before{ content:""; position:absolute; inset:0; border-radius:inherit; background: linear-gradient(to bottom right, rgba(255,255,255,.15), rgba(255,255,255,0)); opacity:.08; pointer-events:none; }
         .card-clock .text-white{ color:#0f172a !important; }
         .card-clock .text-white\/70{ color:rgba(15,23,42,.7) !important; }
         .card-clock .text-white\/80{ color:rgba(15,23,42,.8) !important; }
@@ -57,16 +57,18 @@
         .badge-plan{ background-color: var(--soft-primary-bg); color:#475569; border:1px solid var(--soft-primary-border); }
         .badge-late{ background-color: var(--soft-red-bg); color:#8B1C1C; border:1px solid var(--soft-red-border); }
         .badge-progress{ background-color: var(--soft-orange-bg); color:#c2410c; border:1px solid var(--soft-orange-border); }
-        .badge-cp{ background-color: var(--soft-secondary-bg); color:#1f4e1c; border:1px solid var(--secondary); }
+        .badge-cp{ background-color: var(--soft-secondary-bg); color:#1f4e1c; border:1px solid var(--secondary); border-radius:9999px; padding:2px 6px; }
         .cp-attention{ animation: cpJump .9s ease-in-out infinite; box-shadow: 0 0 0 3px rgba(141,187,54,.25); }
         @keyframes cpJump{ 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-3px) } }
         .diff-badge{ padding:2px 6px; border-radius:6px; font-weight:700; }
         .diff-ok{ background-color: var(--soft-secondary-bg); color:#3C5F1C; border:1px solid var(--soft-secondary-border); }
         .diff-late{ background-color: var(--soft-red-bg); color:#8B1C1C; border:1px solid var(--soft-red-border); }
         .minute-pill{ background-color: var(--soft-orange-bg); color:#b45309; border:1px solid var(--soft-orange-border); border-radius:6px; padding:2px 6px; font-weight:800; font-size:12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-        .digital-clock{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; letter-spacing:1px; }
+        .digital-clock{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; letter-spacing:1px; font-variant-numeric: tabular-nums; }
         .digital-clock .colon{ animation: blinkColon 1s steps(2, start) infinite; }
         @keyframes blinkColon{ 50%{ opacity: .35 } }
+        .clock-face{ display:inline-block; padding:6px 10px; border-radius:10px; background:#0f172a; color:#d9f99d; box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 -1px 0 rgba(0,0,0,.25), 0 2px 6px rgba(0,0,0,.08); }
+        .clock-face .digits{ text-shadow: 0 0 4px rgba(141,187,54,.4); }
         /* Animación de pulso para items en progreso */
         @keyframes pulseSecondary {
             0% { box-shadow: 0 0 0 0 rgba(141,187,54,0.35); }
@@ -558,10 +560,12 @@
                                 <div className="text-slate-600 text-xs font-bold flex items-center justify-center gap-1 text-center">
                                     <Icon type="clock" className="w-3.5 h-3.5" /> Reloj
                                 </div>
-                                <div className="text-slate-800 text-xl font-black digital-clock text-center">
-                                    <span className="digits">{String(currentTime.getHours()).padStart(2, '0')}</span>
-                                    <span className="colon">:</span>
-                                    <span className="digits">{String(currentTime.getMinutes()).padStart(2, '0')}</span>
+                                <div className="text-xl font-black digital-clock text-center">
+                                    <span className="clock-face">
+                                        <span className="digits">{String(currentTime.getHours()).padStart(2, '0')}</span>
+                                        <span className="colon">:</span>
+                                        <span className="digits">{String(currentTime.getMinutes()).padStart(2, '0')}</span>
+                                    </span>
                                 </div>
                                 <div className="text-slate-500 text-xs text-center">hora actual</div>
                             </div>
