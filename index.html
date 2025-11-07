@@ -28,6 +28,10 @@
             --soft-red-bg:#FDEAEA;
             --soft-red-border:#FAC5C5;
             --red:#D12B2B;
+            /* paleta naranja suave para estados de progreso */
+            --orange:#f97316;
+            --soft-orange-bg:#fff7ed; /* orange-50 */
+            --soft-orange-border:#fed7aa; /* orange-200 */
         }
         .btn-secondary{ background-color: var(--secondary); color:#fff; }
         .btn-secondary:active{ background-color:#6d9a28; }
@@ -46,10 +50,11 @@
         .badge-ok{ background-color: var(--soft-secondary-bg); color:#3C5F1C; border:1px solid var(--soft-secondary-border); }
         .badge-plan{ background-color: var(--soft-primary-bg); color:#475569; border:1px solid var(--soft-primary-border); }
         .badge-late{ background-color: var(--soft-red-bg); color:#8B1C1C; border:1px solid var(--soft-red-border); }
+        .badge-progress{ background-color: var(--soft-orange-bg); color:#c2410c; border:1px solid var(--soft-orange-border); }
         .diff-badge{ padding:2px 6px; border-radius:6px; font-weight:700; }
         .diff-ok{ background-color: var(--soft-secondary-bg); color:#3C5F1C; border:1px solid var(--soft-secondary-border); }
         .diff-late{ background-color: var(--soft-red-bg); color:#8B1C1C; border:1px solid var(--soft-red-border); }
-        .minute-pill{ background-color: var(--soft-primary-bg); color:#334155; border:1px solid var(--soft-primary-border); border-radius:6px; padding:2px 6px; font-weight:800; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+        .minute-pill{ background-color: var(--soft-orange-bg); color:#b45309; border:1px solid var(--soft-orange-border); border-radius:6px; padding:2px 6px; font-weight:800; font-size:11px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
         /* Animación de pulso para items en progreso */
         @keyframes pulseSecondary {
             0% { box-shadow: 0 0 0 0 rgba(141,187,54,0.35); }
@@ -328,6 +333,7 @@
   .badge-ok{background:rgba(141,187,54,.12);color:var(--secondary);border-color:rgba(141,187,54,.35)}
   .badge-late{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
   .badge-plan{background:#f8fafc;color:#334155;border-color:#cbd5e1}
+  .badge-progress{background:#fff7ed;color:#c2410c;border-color:#fed7aa}
   .delays{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .delay-card{border:1px solid #fecaca;border-radius:12px;background:#fef2f2;color:#b91c1c;padding:10px}
   .delay-card.crit{background:var(--red);color:#fff;border:0}
@@ -382,7 +388,7 @@
               ${proc.diff !== null ? `${proc.diff > 0 ? '+' : ''}${proc.diff}'` : '-'}
             </td>
             <td>
-              <span class=\"badge ${proc.status === 'ok' ? 'badge-ok' : (proc.status === 'late' ? 'badge-late' : 'badge-plan')}\">${proc.inProgress && !proc.real ? 'En progreso' : (proc.real && proc.diff === 0 ? 'Ejecutado' : statusText(proc.status))}</span>
+              <span class=\"badge ${proc.inProgress && !proc.real ? 'badge-progress' : (proc.status === 'ok' ? 'badge-ok' : (proc.status === 'late' ? 'badge-late' : 'badge-plan'))}\">${proc.inProgress && !proc.real ? 'En progreso' : (proc.real && proc.diff === 0 ? 'Ejecutado' : statusText(proc.status))}</span>
             </td>
           </tr>`).join('')}
       </tbody>
@@ -558,9 +564,10 @@
                                      proc.status === 'setup' ? 'Planificar' :
                                      'Fuera de tiempo');
                                 const badgeClass =
-                                    proc.status === 'ok' ? 'badge-ok' :
+                                    proc.inProgress ? 'badge-progress' :
+                                    (proc.status === 'ok' ? 'badge-ok' :
                                     (proc.status === 'planned' || proc.status === 'setup') ? 'badge-plan' :
-                                    'badge-late';
+                                    'badge-late');
                                 
                                 return (
                                     <div key={proc.id} className={`rounded-lg border-l-4 ${statusColors[proc.status]} ${proc.highlight && proc.status !== 'ok' ? 'ring-2 ring-red-300' : ''} shadow-sm ${proc.inProgress ? 'pulse' : ''}`}>
