@@ -19,8 +19,9 @@
         :root{
             --primary:#163071; /* azul primario */
             --secondary:#8DBB36; /* verde secundario */
-            --soft-primary-bg:#E8EEF9;
-            --soft-primary-border:#C8D2EA;
+            /* neutrales suaves para evitar tonos celestes */
+            --soft-primary-bg:#F4F6FA;
+            --soft-primary-border:#D6DCE8;
             --soft-secondary-bg:#EFF6E6;
             --soft-secondary-border:#D1E5A6;
             --soft-red-bg:#FDEAEA;
@@ -30,13 +31,13 @@
         .header-brand-bg{ background-color: var(--primary); }
         .btn-primary{ background-color: var(--primary); color:#fff; }
         .btn-primary:active{ background-color:#0f2454; }
-        .input-primary{ background-color: var(--soft-primary-bg); border:1px solid var(--soft-primary-border); color:#0f2454; }
+        .input-primary{ background-color:#FFFFFF; border:1px solid var(--soft-primary-border); color:var(--primary); }
         .input-secondary{ background-color: var(--soft-secondary-bg); border:1px solid var(--soft-secondary-border); color:#335e11; }
         .card-ok{ background-color: var(--secondary); }
         .card-late{ background-color: var(--red); }
         .card-neutral{ background-color: var(--primary); }
         .badge-ok{ background-color: var(--soft-secondary-bg); color:#3C5F1C; border:1px solid var(--soft-secondary-border); }
-        .badge-plan{ background-color: var(--soft-primary-bg); color:var(--primary); border:1px solid var(--soft-primary-border); }
+        .badge-plan{ background-color: var(--soft-primary-bg); color:#475569; border:1px solid var(--soft-primary-border); }
         .badge-late{ background-color: var(--soft-red-bg); color:#8B1C1C; border:1px solid var(--soft-red-border); }
         .diff-badge{ padding:2px 6px; border-radius:6px; font-weight:700; }
         .diff-ok{ background-color: var(--soft-secondary-bg); color:#3C5F1C; border:1px solid var(--soft-secondary-border); }
