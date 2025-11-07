@@ -54,6 +54,9 @@
         .badge-plan{ background-color: var(--soft-primary-bg); color:#475569; border:1px solid var(--soft-primary-border); }
         .badge-late{ background-color: var(--soft-red-bg); color:#8B1C1C; border:1px solid var(--soft-red-border); }
         .badge-progress{ background-color: var(--soft-orange-bg); color:#c2410c; border:1px solid var(--soft-orange-border); }
+        .badge-cp{ background-color: var(--soft-secondary-bg); color:#1f4e1c; border:1px solid var(--secondary); }
+        .cp-attention{ animation: cpJump .9s ease-in-out infinite; box-shadow: 0 0 0 3px rgba(141,187,54,.25); }
+        @keyframes cpJump{ 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-3px) } }
         .diff-badge{ padding:2px 6px; border-radius:6px; font-weight:700; }
         .diff-ok{ background-color: var(--soft-secondary-bg); color:#3C5F1C; border:1px solid var(--soft-secondary-border); }
         .diff-late{ background-color: var(--soft-red-bg); color:#8B1C1C; border:1px solid var(--soft-red-border); }
@@ -284,6 +287,13 @@
             const tatTarget = config.tatTotal;
             const tatDiff = actualTAT !== null ? (actualTAT - tatTarget) : 0;
                 const tatCardClass = actualTAT === null ? 'card-neutral' : (tatDiff > 0 ? 'card-late' : 'card-ok');
+
+            // Datos CP (Cierre de Puertas) y animación de aproximación
+            const cpPlanned = allProcesses.find(p => p.id === 'doorsClosed')?.planned || null;
+            const cpPlannedMins = cpPlanned ? timeToMinutes(cpPlanned) : null;
+            const nowMins = currentTime.getHours() * 60 + currentTime.getMinutes();
+            const cpPending = !allProcesses.find(p => p.id === 'doorsClosed')?.real;
+            const cpApproaching = cpPlannedMins !== null && cpPending && (cpPlannedMins - nowMins) >= 0 && (cpPlannedMins - nowMins) <= 5;
 
             const captureTime = (processId) => {
                 setRealTimes(prev => ({ ...prev, [processId]: getCurrentTimeString() }));
@@ -540,7 +550,7 @@
                             </div>
                             <div className="rounded-lg p-2.5 card-clock">
                                 <div className="absolute top-1 right-1">
-                                    <span className="text-[10px] font-bold badge-plan">CP {(allProcesses.find(p => p.id === 'doorsClosed')?.planned) || '--:--'}</span>
+                                    <span className={`text-[10px] font-bold badge-cp ${cpApproaching ? 'cp-attention' : ''}`}>CP {cpPlanned || '--:--'}</span>
                                 </div>
                                 <div className="text-white/70 text-xs font-bold flex items-center justify-center gap-1 text-center">
                                     <Icon type="clock" className="w-3.5 h-3.5" /> Reloj
