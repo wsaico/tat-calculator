@@ -49,6 +49,7 @@
         .diff-badge{ padding:2px 6px; border-radius:6px; font-weight:700; }
         .diff-ok{ background-color: var(--soft-secondary-bg); color:#3C5F1C; border:1px solid var(--soft-secondary-border); }
         .diff-late{ background-color: var(--soft-red-bg); color:#8B1C1C; border:1px solid var(--soft-red-border); }
+        .minute-pill{ background-color: var(--soft-primary-bg); color:#334155; border:1px solid var(--soft-primary-border); border-radius:6px; padding:2px 6px; font-weight:800; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
         /* Animación de pulso para items en progreso */
         @keyframes pulseSecondary {
             0% { box-shadow: 0 0 0 0 rgba(141,187,54,0.35); }
@@ -591,6 +592,7 @@
                                                             {proc.diff > 0 ? '+' : ''}{proc.diff}'
                                                         </span>
                                                     )}
+                                                    <span className="minute-pill">{proc.offset}</span>
                                                 </div>
                                                     {!isManual && (
                                                         <div className="flex items-center gap-2 flex-wrap justify-end">
