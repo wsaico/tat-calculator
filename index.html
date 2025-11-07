@@ -49,6 +49,13 @@
         .diff-badge{ padding:2px 6px; border-radius:6px; font-weight:700; }
         .diff-ok{ background-color: var(--soft-secondary-bg); color:#3C5F1C; border:1px solid var(--soft-secondary-border); }
         .diff-late{ background-color: var(--soft-red-bg); color:#8B1C1C; border:1px solid var(--soft-red-border); }
+        /* Animación de pulso para items en progreso */
+        @keyframes pulseSecondary {
+            0% { box-shadow: 0 0 0 0 rgba(141,187,54,0.35); }
+            70% { box-shadow: 0 0 0 10px rgba(141,187,54,0.0); }
+            100% { box-shadow: 0 0 0 0 rgba(141,187,54,0.0); }
+        }
+        .pulse { animation: pulseSecondary 1.8s ease-out infinite; }
     </style>
 </head>
 <body>
@@ -184,6 +191,7 @@
             };
 
             const analyzeAllProcesses = () => {
+                const currentMins = currentTime.getHours() * 60 + currentTime.getMinutes();
                 return config.processes.map(process => {
                     const planned = getPlannedTime(process);
                     const itinerary = getItineraryTime(process);
@@ -197,6 +205,7 @@
                     } else {
                         status = (!isConfigured || plannedMins === null) ? 'setup' : 'planned';
                     }
+                    const inProgress = !real && plannedMins !== null && Math.abs(plannedMins - currentMins) <= 2;
                     
                     return {
                         ...process,
@@ -204,7 +213,8 @@
                         itinerary,
                         real,
                         diff,
-                        status
+                        status,
+                        inProgress
                     };
                 });
             };
@@ -343,7 +353,7 @@
               ${proc.diff !== null ? `${proc.diff > 0 ? '+' : ''}${proc.diff}'` : '-'}
             </td>
             <td>
-              <span class=\"badge ${proc.status === 'ok' ? 'badge-ok' : (proc.status === 'late' ? 'badge-late' : 'badge-plan')}\">${statusText(proc.status)}</span>
+              <span class=\"badge ${proc.status === 'ok' ? 'badge-ok' : (proc.status === 'late' ? 'badge-late' : 'badge-plan')}\">${proc.inProgress && !proc.real ? 'En progreso' : (proc.real && proc.diff === 0 ? 'Ejecutado' : statusText(proc.status))}</span>
             </td>
           </tr>`).join('')}
       </tbody>
@@ -362,6 +372,7 @@
       </div>
     ` : ''}
   </div>
+  <div style=\"padding:10px 20px;text-align:center;font-size:11px;color:#64748b\">hecho con ♥️ por <a href=\"https://wsaico.com\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"text-decoration:underline;color:#0f172a\">wsaico</a></div>
 </body></html>`;
 
                 const blob = new Blob([html], { type: 'text/html' });
@@ -512,17 +523,18 @@
                                     setup: 'border-slate-300 bg-white'
                                 };
                                 const badgeText =
-                                    proc.status === 'ok' ? 'A tiempo' :
-                                    proc.status === 'planned' ? 'Planificado' :
-                                    proc.status === 'setup' ? 'Planificar' :
-                                    'Fuera de tiempo';
+                                    proc.inProgress ? 'En progreso' :
+                                    (proc.status === 'ok' ? (proc.diff === 0 ? 'Ejecutado' : 'A tiempo') :
+                                     proc.status === 'planned' ? 'Planificado' :
+                                     proc.status === 'setup' ? 'Planificar' :
+                                     'Fuera de tiempo');
                                 const badgeClass =
                                     proc.status === 'ok' ? 'badge-ok' :
                                     (proc.status === 'planned' || proc.status === 'setup') ? 'badge-plan' :
                                     'badge-late';
                                 
                                 return (
-                                    <div key={proc.id} className={`rounded-lg border-l-4 ${statusColors[proc.status]} ${proc.highlight && proc.status !== 'ok' ? 'ring-2 ring-red-300' : ''} shadow-sm`}>
+                                    <div key={proc.id} className={`rounded-lg border-l-4 ${statusColors[proc.status]} ${proc.highlight && proc.status !== 'ok' ? 'ring-2 ring-red-300' : ''} shadow-sm ${proc.inProgress ? 'pulse' : ''}`}>
                                         <div className="p-2.5">
                                             <div>
                                                 <div className="flex items-center justify-between gap-2">
@@ -675,7 +687,10 @@
                                                                 ) : '-'}
                                                             </td>
                                                             <td className="p-2 text-center">
-                                                                {proc.status === 'ok' && <span className="font-bold" style={{ color: 'var(--secondary)' }}>✓ A tiempo</span>}
+                                                                {proc.inProgress && !proc.real && <span className="font-bold" style={{ color: 'var(--secondary)' }}>• En progreso</span>}
+                                                                {!proc.inProgress && proc.status === 'ok' && (
+                                                                    <span className="font-bold" style={{ color: 'var(--secondary)' }}>{proc.diff === 0 ? '✓ Ejecutado' : '✓ A tiempo'}</span>
+                                                                )}
                                                                 {proc.status === 'late' && <span className="text-red-600 font-bold">✗ Fuera de tiempo</span>}
                                                                 {proc.status === 'planned' && <span className="text-slate-600 font-bold">• Planificado</span>}
                                                                 {proc.status === 'setup' && <span className="text-slate-400 font-bold">○ Planificar</span>}
@@ -724,7 +739,11 @@
                                         </div>
                                     </div>
 
-                                    <button onClick={() => setShowSummary(false)} className="w-full py-2.5 bg-slate-800 text-white rounded-lg font-bold text-sm active:bg-slate-900">
+                                    <div className="py-3 text-center text-xs text-slate-500">
+                                        hecho con ♥️ por <a href="https://wsaico.com" target="_blank" rel="noopener noreferrer" className="underline">wsaico</a>
+                                    </div>
+
+                                    <button onClick={() => setShowSummary(false)} className="w-full py-2.5 bg-slate-800 text-white rounded-lg font-bold text-sm active:bg-slate-900" data-html2canvas-ignore>
                                         Cerrar Resumen
                                     </button>
                                 </div>
