@@ -16,6 +16,31 @@
         input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        :root{
+            --primary:#163071; /* azul primario */
+            --secondary:#8DBB36; /* verde secundario */
+            --soft-primary-bg:#E8EEF9;
+            --soft-primary-border:#C8D2EA;
+            --soft-secondary-bg:#EFF6E6;
+            --soft-secondary-border:#D1E5A6;
+            --soft-red-bg:#FDEAEA;
+            --soft-red-border:#FAC5C5;
+            --red:#D12B2B;
+        }
+        .header-brand-bg{ background-color: var(--primary); }
+        .btn-primary{ background-color: var(--primary); color:#fff; }
+        .btn-primary:active{ background-color:#0f2454; }
+        .input-primary{ background-color: var(--soft-primary-bg); border:1px solid var(--soft-primary-border); color:#0f2454; }
+        .input-secondary{ background-color: var(--soft-secondary-bg); border:1px solid var(--soft-secondary-border); color:#335e11; }
+        .card-ok{ background-color: var(--secondary); }
+        .card-late{ background-color: var(--red); }
+        .card-neutral{ background-color: var(--primary); }
+        .badge-ok{ background-color: var(--soft-secondary-bg); color:#3C5F1C; border:1px solid var(--soft-secondary-border); }
+        .badge-plan{ background-color: var(--soft-primary-bg); color:var(--primary); border:1px solid var(--soft-primary-border); }
+        .badge-late{ background-color: var(--soft-red-bg); color:#8B1C1C; border:1px solid var(--soft-red-border); }
+        .diff-badge{ padding:2px 6px; border-radius:6px; font-weight:700; }
+        .diff-ok{ background-color: var(--soft-secondary-bg); color:#3C5F1C; border:1px solid var(--soft-secondary-border); }
+        .diff-late{ background-color: var(--soft-red-bg); color:#8B1C1C; border:1px solid var(--soft-red-border); }
     </style>
 </head>
 <body>
@@ -168,10 +193,11 @@
 
             const calculateActualTAT = () => {
                 if (!motorCutTime) return null;
-                const pushProcess = config.processes.find(p => p.id === 'pushBack');
-                const plannedPush = pushProcess ? getPlannedTime(pushProcess) : null;
-                const realPush = realTimes.pushBack || null;
-                const endTime = realPush || plannedPush;
+                const endId = aircraftType === 'autopropulsado' ? 'etd' : 'pushBack';
+                const endProcess = config.processes.find(p => p.id === endId);
+                const plannedEnd = endProcess ? getPlannedTime(endProcess) : null;
+                const realEnd = realTimes[endId] || null;
+                const endTime = realEnd || plannedEnd;
                 if (!endTime) return null;
                 return timeToMinutes(endTime) - timeToMinutes(motorCutTime);
             };
@@ -187,10 +213,9 @@
                 : null;
             const completed = allProcesses.filter(p => p.real).length;
             const actualTAT = calculateActualTAT();
-            const pushProcess = config.processes.find(p => p.id === 'pushBack');
-            const tatTarget = (pushProcess ? (config.tatTotal + (pushProcess.offset || 0)) : config.tatTotal);
+            const tatTarget = config.tatTotal;
             const tatDiff = actualTAT !== null ? (actualTAT - tatTarget) : 0;
-            const tatCardClass = actualTAT === null ? 'bg-slate-600' : (tatDiff > 0 ? 'bg-red-600' : 'bg-green-600');
+                const tatCardClass = actualTAT === null ? 'card-neutral' : (tatDiff > 0 ? 'card-late' : 'card-ok');
 
             const captureTime = (processId) => {
                 setRealTimes(prev => ({ ...prev, [processId]: getCurrentTimeString() }));
@@ -309,7 +334,7 @@
                         <div className="max-w-2xl mx-auto px-3 py-2.5">
                             <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center">
+                                    <div className="w-9 h-9 header-brand-bg rounded-lg flex items-center justify-center">
                                         <Icon type="plane" className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
@@ -318,7 +343,7 @@
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <button onClick={generateHtmlSummary} className="px-2 h-9 bg-slate-800 text-white rounded-lg text-xs font-bold active:bg-slate-900">Ver Resumen</button>
+                                    <button onClick={generateHtmlSummary} className="px-2 h-9 btn-primary rounded-lg text-xs font-bold">Ver Resumen</button>
                                     <button onClick={() => setShowItinerary(v => !v)} className={`px-2 h-9 rounded-lg text-xs font-bold border ${showItinerary ? 'bg-emerald-600 text-white border-emerald-700' : 'bg-slate-100 text-slate-700 border-slate-300'}`}>
                                         {showItinerary ? 'Itinerario comercial: ON' : 'Itinerario comercial: OFF'}
                                     </button>
@@ -361,19 +386,19 @@
                                 <div>
                                     <label className="text-xs font-bold text-slate-600 mb-1 block">Corte Motor</label>
                                     <input type="time" value={motorCutTime} onChange={(e) => setMotorCutTime(e.target.value)} 
-                                        className="w-full px-2.5 py-1.5 bg-blue-50 border border-blue-300 rounded font-mono text-sm font-bold text-blue-900" />
+                                        className="w-full px-2.5 py-1.5 input-primary rounded font-mono text-sm font-bold" />
                                 </div>
                                 {showItinerary && (
                                     <div>
                                         <label className="text-xs font-bold text-slate-600 mb-1 block">Corte Motor Itinerario (Comercial)</label>
                                         <input type="time" value={itineraryMotorCutTime} onChange={(e) => setItineraryMotorCutTime(e.target.value)} 
-                                            className="w-full px-2.5 py-1.5 bg-emerald-50 border border-emerald-300 rounded font-mono text-sm font-bold text-emerald-900" />
+                                            className="w-full px-2.5 py-1.5 input-primary rounded font-mono text-sm font-bold" />
                                     </div>
                                 )}
                                 <div>
                                     <label className="text-xs font-bold text-slate-600 mb-1 block">ETD Plan</label>
                                     <input type="time" value={etdTime} onChange={(e) => setETDTime(e.target.value)} 
-                                        className="w-full px-2.5 py-1.5 bg-green-50 border border-green-300 rounded font-mono text-sm font-bold text-green-900" />
+                                        className="w-full px-2.5 py-1.5 input-secondary rounded font-mono text-sm font-bold" />
                                 </div>
                             </div>
                         </div>
@@ -416,9 +441,9 @@
                                     proc.status === 'setup' ? 'Planificar' :
                                     'Fuera de tiempo';
                                 const badgeClass =
-                                    proc.status === 'ok' ? 'bg-green-100 text-green-700 border border-green-200' :
-                                    (proc.status === 'planned' || proc.status === 'setup') ? 'bg-slate-100 text-slate-700 border border-slate-200' :
-                                    'bg-red-100 text-red-700 border border-red-200';
+                                    proc.status === 'ok' ? 'badge-ok' :
+                                    (proc.status === 'planned' || proc.status === 'setup') ? 'badge-plan' :
+                                    'badge-late';
                                 
                                 return (
                                     <div key={proc.id} className={`rounded-lg border-l-4 ${statusColors[proc.status]} ${proc.highlight && proc.status !== 'ok' ? 'ring-2 ring-red-300' : ''} shadow-sm`}>
@@ -438,7 +463,7 @@
                                                         <span className="text-xs text-slate-500 font-semibold">Itin: <span className="font-mono font-bold text-slate-700">{proc.itinerary || '--:--'}</span></span>
                                                     )}
                                                     {proc.diff !== null && (
-                                                        <span className={`text-xs px-1.5 py-0.5 rounded font-bold ${proc.diff > 0 ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`}>
+                                                        <span className={`text-xs diff-badge ${proc.diff > 0 ? 'diff-late' : 'diff-ok'}`}>
                                                             {proc.diff > 0 ? '+' : ''}{proc.diff}'
                                                         </span>
                                                     )}
