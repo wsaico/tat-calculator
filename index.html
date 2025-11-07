@@ -247,92 +247,120 @@
                     s === 'planned' ? 'Planificado' :
                     'Planificar'
                 );
-        const nowStr = new Date().toLocaleString('es-PE', { hour12: false });
+                const nowStr = new Date().toLocaleString('es-PE', { hour12: false });
                 const delaysSorted = [...delays].sort((a, b) => b.diff - a.diff);
                 const complianceText = actualTAT !== null ? (tatDiff > 0 ? `Fuera de tiempo +${tatDiff}'` : 'OK') : '--';
-                const complianceClass = actualTAT !== null && tatDiff > 0 ? 'color:#dc2626' : 'color:#16a34a';
+                const isLate = actualTAT !== null && tatDiff > 0;
 
                 const html = `<!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Resumen TAT</title>
 <style>
- body{font-family:system-ui,-apple-system,sans-serif;margin:20px;background:#fff;}
- .title{font-weight:900;color:#0f172a;font-size:20px;margin:0 0 6px;}
- .meta{font-size:12px;color:#475569;margin-bottom:14px;}
- .card{border:1px solid #cbd5e1;border-radius:10px;padding:12px;margin-bottom:10px;}
- .row{display:flex;gap:14px}
- .col{flex:1;text-align:center}
- .label{font-size:12px;color:#475569;font-weight:700}
- .value{font-size:18px;font-weight:900;color:#0f172a}
- .value-green{color:#16a34a}
- .value-red{color:#dc2626}
- table{width:100%;border-collapse:collapse;font-size:12px}
- th,td{border:1px solid #cbd5e1;padding:6px}
- thead{background:#f1f5f9}
- .section-title{font-size:13px;font-weight:900;color:#0f172a;margin:12px 0 8px}
- .delay-item{display:flex;justify-content:space-between;padding:6px;border:1px solid #fecaca;border-radius:8px;margin-bottom:6px;background:#fef2f2;color:#b91c1c}
- .crit{background:#dc2626;color:#fff;border:0}
- .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace;font-weight:700}
+  :root{
+    --primary:#0f172a; /* slate-900 */
+    --secondary:#8DBB36; /* verde ejecutivo */
+    --neutral:#f1f5f9; /* slate-100 */
+    --soft:#ffffff;
+    --red:#dc2626;
+    --orange:#f97316;
+    --border:#cbd5e1;
+  }
+  *{box-sizing:border-box}
+  body{font-family:system-ui,-apple-system,sans-serif;margin:0;background:#fff;color:#0f172a}
+  .header{background:var(--primary);color:#fff;padding:16px 20px;border-bottom:4px solid var(--secondary)}
+  .title{margin:0;font-weight:900;font-size:18px}
+  .meta{margin-top:4px;font-size:12px;opacity:.85}
+  .container{padding:18px 20px}
+  .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+  .kpi{border-radius:12px;padding:12px;color:#fff}
+  .kpi .label{font-size:12px;opacity:.85;font-weight:800}
+  .kpi .value{font-size:20px;font-weight:900}
+  .kpi.ok{background:var(--secondary)}
+  .kpi.neutral{background:#334155}
+  .kpi.late{background:var(--red)}
+  .kpi.orange{background:var(--orange)}
+  .section-title{font-size:13px;font-weight:900;margin:14px 0 8px;color:#0f172a}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  thead th{background:var(--neutral);text-align:left}
+  th,td{border:1px solid var(--border);padding:8px}
+  .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace;font-weight:700}
+  .badge{display:inline-block;padding:3px 8px;border-radius:9999px;font-weight:800;font-size:11px;border:1px solid}
+  .badge-ok{background:rgba(141,187,54,.12);color:var(--secondary);border-color:rgba(141,187,54,.35)}
+  .badge-late{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+  .badge-plan{background:#f8fafc;color:#334155;border-color:#cbd5e1}
+  .delays{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .delay-card{border:1px solid #fecaca;border-radius:12px;background:#fef2f2;color:#b91c1c;padding:10px}
+  .delay-card.crit{background:var(--red);color:#fff;border:0}
+  @media (max-width:720px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media print{.header{border:0} .kpi{break-inside:avoid} .delay-card{break-inside:avoid}}
 </style></head>
 <body>
-  <h1 class="title">RESUMEN TAT</h1>
-  <div class="meta">${nowStr} · Tipo: ${aircraftType === 'remolque' ? 'Remolque' : 'Autopropulsado'}</div>
-  <div class="card row">
-    <div class="col">
-      <div class="label">TAT Real</div>
-      <div class="value">${actualTAT !== null ? `${actualTAT}'` : `--'`} / ${tatTarget}'</div>
-    </div>
-    <div class="col">
-      <div class="label">Cumplimiento TAT</div>
-      <div class="value" style="${complianceClass}">${complianceText}</div>
-    </div>
-    <div class="col">
-      <div class="label">Corte Motor</div>
-      <div class="value mono">${motorCutTime || '--:--'}</div>
-    </div>
-    ${showItinerary ? `
-    <div class="col">
-      <div class="label">Corte Motor Itinerario</div>
-      <div class="value mono">${itineraryMotorCutTime || '--:--'}</div>
-    </div>` : ''}
+  <div class="header">
+    <h1 class="title">RESUMEN TAT</h1>
+    <div class="meta">${nowStr} · Tipo: ${aircraftType === 'remolque' ? 'Remolque' : 'Autopropulsado'} · Itinerario: ${showItinerary ? 'ON' : 'OFF'}</div>
   </div>
+  <div class="container">
+    <div class="kpis">
+      <div class="kpi ${actualTAT === null ? 'neutral' : (isLate ? 'late' : 'ok')}">
+        <div class="label">TAT</div>
+        <div class="value">${actualTAT !== null ? `${actualTAT}'` : `--'`} / ${tatTarget}'</div>
+      </div>
+      <div class="kpi ${isLate ? 'late' : 'ok'}">
+        <div class="label">Cumplimiento</div>
+        <div class="value">${complianceText}</div>
+      </div>
+      <div class="kpi neutral">
+        <div class="label">Progreso</div>
+        <div class="value">${completed} / ${config.processes.length}</div>
+      </div>
+      <div class="kpi orange">
+        <div class="label">Retrasos</div>
+        <div class="value">${delays.length}</div>
+      </div>
+    </div>
 
-  <div class="section-title">${showItinerary ? 'Itinerario · Plan · Real' : 'Plan · Real'}</div>
-  <table>
-    <thead>
-      <tr>
-        <th>Proceso</th>
-        ${showItinerary ? '<th>Itinerario</th>' : ''}
-        <th>Plan</th>
-        <th>Real</th>
-        <th>Dif</th>
-        <th>Estado</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${allProcesses.map(proc => `
+    <div class="section-title">${showItinerary ? 'Itinerario · Plan · Real' : 'Plan · Real'}</div>
+    <table>
+      <thead>
         <tr>
-          <td>${proc.highlight ? '⚠️ ' : ''}${proc.name}</td>
-          ${showItinerary ? `<td class="mono">${proc.itinerary || '--:--'}</td>` : ''}
-          <td class="mono">${proc.planned || '--:--'}</td>
-          <td class="mono">${proc.real || '-'}</td>
-          <td class="mono" style="${proc.diff !== null ? (proc.diff > 0 ? 'color:#dc2626' : 'color:#16a34a') : ''}">
-            ${proc.diff !== null ? `${proc.diff > 0 ? '+' : ''}${proc.diff}'` : '-'}
-          </td>
-          <td>${statusText(proc.status)}</td>
-        </tr>`).join('')}
-    </tbody>
-  </table>
+          <th>Proceso</th>
+          ${showItinerary ? '<th>Itinerario</th>' : ''}
+          <th>Plan</th>
+          <th>Real</th>
+          <th>Dif</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${allProcesses.map(proc => `
+          <tr>
+            <td>${proc.highlight ? '⚠️ ' : ''}${proc.name}</td>
+            ${showItinerary ? `<td class=\"mono\">${proc.itinerary || '--:--'}</td>` : ''}
+            <td class=\"mono\">${proc.planned || '--:--'}</td>
+            <td class=\"mono\">${proc.real || '-'}</td>
+            <td class=\"mono\" style=\"${proc.diff !== null ? (proc.diff > 0 ? 'color:var(--red)' : 'color:var(--secondary)') : ''}\">
+              ${proc.diff !== null ? `${proc.diff > 0 ? '+' : ''}${proc.diff}'` : '-'}
+            </td>
+            <td>
+              <span class=\"badge ${proc.status === 'ok' ? 'badge-ok' : (proc.status === 'late' ? 'badge-late' : 'badge-plan')}\">${statusText(proc.status)}</span>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
 
-  ${delaysSorted.length ? `
-    <div class="section-title" style="color:#b91c1c">Procesos con demora</div>
-    ${delaysSorted.map(proc => `
-      <div class="delay-item ${proc.highlight ? 'crit' : ''}">
-        <span>${proc.highlight ? '⚠️ ' : ''}${proc.name}</span>
-        <span class="mono">+${proc.diff}'</span>
-      </div>`).join('')}
-  ` : ''}
-
+    ${delaysSorted.length ? `
+      <div class=\"section-title\" style=\"color:var(--red)\">Procesos con demora</div>
+      <div class=\"delays\">
+        ${delaysSorted.map(proc => `
+          <div class=\"delay-card ${proc.highlight ? 'crit' : ''}\">
+            <div style=\"display:flex;justify-content:space-between;align-items:center;gap:8px\">
+              <div>${proc.highlight ? '⚠️ ' : ''}${proc.name}</div>
+              <div class=\"mono\">+${proc.diff}'</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    ` : ''}
+  </div>
 </body></html>`;
 
                 const blob = new Blob([html], { type: 'text/html' });
